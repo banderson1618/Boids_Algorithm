@@ -1,27 +1,18 @@
 canvas{
-    width: 1000px; 
-    height: 1000px;
+    width: 1200px; 
+    height: 1200px;
 }
 
 body{
     text-align: center;
-    background-color: powderblue;
+    background-color: rgb(0, 0, 0);
 }
 
 
 div{  
+    margin: auto;
     display: flex;
-    width: 1500px;
-    background-color: green;
-}
-
-#canvas_div{
-    width: 1000px;
-}
-
-#div-console{
-    display: block;
-    text-align: left;
-    padding: 30px;
-    background-color: lightcoral;
+    width: 1200px;
+    height: 1200px;
+    background-color: rgb(0, 204, 255);
 }

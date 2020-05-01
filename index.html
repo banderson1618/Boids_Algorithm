@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html lang = "en-US">
+<head>
+    <meta charset = "UTF-8">
+    <title>Canvas Rendering - Shapes</title>
+    <link rel="stylesheet" href="styles\styles.css">
+</head>
+<body>
+    <div>
+        <div id="canvas_div">
+            <canvas id = "id-canvas"
+                width = "1000" height = "1000">
+            </canvas>
+        </div>
+        <div id="div-console">
+            <button id="StartButton">
+                New Game
+            </button>
+            <p id="timer">
+                Timer: 0 seconds       
+            </p>
+            <p id="currentScore">
+                Current Score: 0        
+            </p>
+            <p>
+                High Scores
+            </p>
+            <p id="highScores">
+                1st - 0<br>
+                2nd - 0<br>
+                3rd - 0<br>
+                4th - 0<br>
+                5th - 0<br>
+            </p>
+            <p id="gameSize">
+                Next Game Size: 5x5
+            </p>
+            <p>
+                Set game size:
+            </p>
+            <button id="5x5">
+                    5x5
+            </button>
+            <button id="10x10">
+                    10x10
+            </button>
+            <button id="15x15">
+                    15x15
+            </button>
+            <button id="20x20">
+                    20x20
+            </button>
+        </div>
+    </div>
+    <script>
+        let MyGame = {
+            graphics: {},
+            input: {}
+        };
+    </script>
+    <script src = "scripts/keyboard_input.js"></script>
+    <script src = "scripts/input.js"></script>
+    <script src = "scripts/graphics.js"></script>
+    <script src = "scripts/game.js"></script>
+</body>
+</html>

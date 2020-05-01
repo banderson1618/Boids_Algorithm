@@ -1,0 +1,27 @@
+canvas{
+    width: 1000px; 
+    height: 1000px;
+}
+
+body{
+    text-align: center;
+    background-color: powderblue;
+}
+
+
+div{  
+    display: flex;
+    width: 1500px;
+    background-color: green;
+}
+
+#canvas_div{
+    width: 1000px;
+}
+
+#div-console{
+    display: block;
+    text-align: left;
+    padding: 30px;
+    background-color: lightcoral;
+}

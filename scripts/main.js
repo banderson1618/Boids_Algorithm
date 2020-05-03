@@ -2,9 +2,11 @@ MyGame.main = (function(graphics, objects) {
     'use strict';    
     
     let canvas = document.getElementById('id-canvas');
-    let context = canvas.getContext('2d');
 
-    let boid = objects.Boid(1)
+    const NUM_BOIDS = 1;
+
+    let boids = [];
+
 
     let pos = {
         x: 500,
@@ -14,13 +16,17 @@ MyGame.main = (function(graphics, objects) {
     let lastFrameTime = Date.now();
     let elapsedTime = 0;
 
-    function update(elapsedTime) {        
-        boid.update(elapsedTime)
+    function update(elapsedTime) {
+        for (let boid of boids){
+            boid.update(elapsedTime, boids)
+        }
     }
 
     function render() {
         graphics.clear();
-        graphics.drawBoid(boid);
+        for (let boid of boids){
+            graphics.drawBoid(boid);
+        }
     }
 
     function gameLoop() {
@@ -33,6 +39,18 @@ MyGame.main = (function(graphics, objects) {
         requestAnimationFrame(gameLoop);
     }
 
-    requestAnimationFrame(gameLoop);
+    function populateBoids(){
+        for(let i = 0; i < NUM_BOIDS; i++){
+            boids.push(new objects.Boid(i));
+        }
+    }
+
+    function start() {
+        populateBoids();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    start();
 
 }(MyGame.graphics, MyGame.objects));

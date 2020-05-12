@@ -4,18 +4,21 @@ const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const MAX_TURN_RATE = Math.PI  // radians per second
 const VISUAL_RANGE = WIDTH / 10;
-const DIST_FROM_WALL = 50;
+const DIST_FROM_WALL = 200;
+const TEST_TURN_RATE = Math.PI / 90;
 
 function randInt(bottom, top) {
     return Math.floor( Math.random() * ( top - bottom) ) + bottom;
 }
 
 function getPos(){
-    return {x: 900, y: 500}//{x: randInt(0, WIDTH), y: randInt(0, HEIGHT)};
+    return {x: 800, y: 500}
+    // return {x: randInt(DIST_FROM_WALL, WIDTH - DIST_FROM_WALL), y: randInt(DIST_FROM_WALL, HEIGHT - DIST_FROM_WALL)};
 }
 
 function getOrientation() {
-    return -0.5;// Math.random() * 2 * Math.PI;
+    // return Math.random() * 2 * Math.PI;
+    return 0.
 }
 
 const WALLS = {
@@ -30,16 +33,36 @@ function notCloseEnough(distance){
     return distance > DIST_FROM_WALL;
 }
 
+function bindToLimit(val, limit){
+    let absLimit = Math.abs(limit)
+    let retVal = Math.min(val, absLimit);
+    retVal = Math.max(retVal, -1 * absLimit);
+    return retVal;
+}
+
+function bindRadian(val){
+    let retVal = val
+    if (val > 2 * Math.PI){
+        retVal += diff;
+    }
+    else if(val < 0){
+        retVal += 2 * Math.PI;
+    }
+    return retVal
+}
+
 MyGame.objects.Boid = function(boidId){
     let pos = getPos();
     let orientation = getOrientation();
-    let speed = 50;
+    let speed = 100;
 
     let specs = {
         pos: pos,
         orientation: orientation,
         speed: speed,
     }
+
+    console.log("Turn: " +turnAwayFromDir(0))
 
     function findClosestWall(){
         let distFromLeft = specs.pos.x;
@@ -89,12 +112,28 @@ MyGame.objects.Boid = function(boidId){
         }
     }
 
-    function turnAwayFromDir(dir){
-        if (specs.orientation - dir > 0){
-            return Math.PI / 2;
-        }
-        else{
-            return -1 * Math.PI / 2;
+    function anglesAreClose(angleOne, angleTwo, margin){
+        return Math.abs(angleOne - angleTwo) > margin || Math.abs((angleOne - 2 * Math.PI) - angleTwo) > margin;
+    }
+
+
+    function turnAwayFromDir(dir){  
+        let turnLeftDir = specs.orientation;
+        let turnRightDir = specs.orientation; 
+        while (true){
+            turnLeftDir -= TEST_TURN_RATE;
+            turnRightDir += TEST_TURN_RATE;
+            turnLeftDir = bindRadian(turnLeftDir)
+            turnRightDir = bindRadian(turnLeftDir)
+            if (anglesAreClose(turnRightDir, dir, TEST_TURN_RATE)){
+                console.log("turnRightDir: " + turnRightDir)
+                console.log("turnLeftDir: " + turnLeftDir)
+                console.log()
+                return Math.PI / 2;
+            }
+            else if(anglesAreClose(turnLeftDir, dir, TEST_TURN_RATE)){
+                return -1 * Math.PI / 2;
+            }
         }
     }
 
@@ -102,10 +141,10 @@ MyGame.objects.Boid = function(boidId){
         switch(findClosestWall()){
             case WALLS.TOP:
                 console.log("TOP");
-                return turnAwayFromDir(Math.PI / 2);
+                return turnAwayFromDir(3 * Math.PI / 2);
             case WALLS.BOTTOM:
                 console.log("BOTTOM");
-                return turnAwayFromDir(3 * Math.PI / 2);
+                return turnAwayFromDir(Math.PI / 2);
             case WALLS.LEFT:
                 console.log("LEFT");
                 return turnAwayFromDir(Math.PI);
@@ -116,12 +155,6 @@ MyGame.objects.Boid = function(boidId){
                 return 0;
         }
     }
-
-    function bindToLimit(val, limit){
-        let retVal = Math.min(val, Math.abs(limit));
-        retVal = Math.max(val, -1 * Math.abs(limit));
-        return retVal;
-    }
     
     function setOrientation(timeInSeconds, boids){
         let turn = 0;
@@ -129,18 +162,9 @@ MyGame.objects.Boid = function(boidId){
         turn += avoidWalls();
 
         turn = bindToLimit(turn, MAX_TURN_RATE * timeInSeconds);
-        if (turn !== 0){
-            console.log(MAX_TURN_RATE * timeInSeconds)
-            console.log(turn);
-        }
         
         specs.orientation += turn;
-        if (specs.orientation > 2 * Math.PI){
-            specs.orientation -= 2 * Math.PI;
-        }
-        else if(specs.orientation < 0){
-            specs.orientation += 2 * Math.PI;
-        }
+        specs.orientation = bindRadian(specs.orientation)
     }
 
     function move(timeInSeconds){

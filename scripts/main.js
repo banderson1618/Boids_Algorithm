@@ -48,7 +48,7 @@ MyGame.main = (function(graphics, objects) {
     function start() {
         populateBoids();
 
-        requestAnimationFrame(gameLoop);
+        // requestAnimationFrame(gameLoop);
     }
 
     start();

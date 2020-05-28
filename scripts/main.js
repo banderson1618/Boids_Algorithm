@@ -3,15 +3,9 @@ MyGame.main = (function(graphics, objects) {
     
     let canvas = document.getElementById('id-canvas');
 
-    const NUM_BOIDS = 1;
+    const NUM_BOIDS = 50;
 
     let boids = [];
-
-
-    let pos = {
-        x: 500,
-        y: 500
-    }
     
     let lastFrameTime = Date.now();
     let elapsedTime = 0;
@@ -48,7 +42,7 @@ MyGame.main = (function(graphics, objects) {
     function start() {
         populateBoids();
 
-        // requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop);
     }
 
     start();

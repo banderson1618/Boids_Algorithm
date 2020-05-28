@@ -1,10 +1,11 @@
 let canvas = document.getElementById('id-canvas');
 
+const FULL_RADIAN = Math.PI * 2
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
-const MAX_TURN_RATE = Math.PI  // radians per second
+const MAX_TURN_RATE = 2 * Math.PI // radians per second
 const VISUAL_RANGE = WIDTH / 10;
-const DIST_FROM_WALL = 200;
+const DIST_FROM_WALL = 50;
 const TEST_TURN_RATE = Math.PI / 90;
 
 function randInt(bottom, top) {
@@ -12,13 +13,11 @@ function randInt(bottom, top) {
 }
 
 function getPos(){
-    return {x: 800, y: 500}
-    // return {x: randInt(DIST_FROM_WALL, WIDTH - DIST_FROM_WALL), y: randInt(DIST_FROM_WALL, HEIGHT - DIST_FROM_WALL)};
+    return {x: randInt(DIST_FROM_WALL, WIDTH - DIST_FROM_WALL), y: randInt(DIST_FROM_WALL, HEIGHT - DIST_FROM_WALL)};
 }
 
 function getOrientation() {
-    // return Math.random() * 2 * Math.PI;
-    return 0.
+    return Math.random() * 2 * Math.PI;
 }
 
 const WALLS = {
@@ -29,8 +28,8 @@ const WALLS = {
     NO_CLOSE_WALL: 'no_close_wall'
 }
 
-function notCloseEnough(distance){
-    return distance > DIST_FROM_WALL;
+function closeEnough(distance){
+    return distance < DIST_FROM_WALL;
 }
 
 function bindToLimit(val, limit){
@@ -42,11 +41,11 @@ function bindToLimit(val, limit){
 
 function bindRadian(val){
     let retVal = val
-    if (val > 2 * Math.PI){
-        retVal += diff;
+    if (val > FULL_RADIAN){
+        retVal -= FULL_RADIAN;
     }
     else if(val < 0){
-        retVal += 2 * Math.PI;
+        retVal += FULL_RADIAN;
     }
     return retVal
 }
@@ -54,7 +53,7 @@ function bindRadian(val){
 MyGame.objects.Boid = function(boidId){
     let pos = getPos();
     let orientation = getOrientation();
-    let speed = 100;
+    let speed = 200;
 
     let specs = {
         pos: pos,
@@ -62,104 +61,76 @@ MyGame.objects.Boid = function(boidId){
         speed: speed,
     }
 
-    console.log("Turn: " +turnAwayFromDir(0))
-
-    function findClosestWall(){
-        let distFromLeft = specs.pos.x;
-        let distFromRight = WIDTH - specs.pos.x;
-        let distFromTop = specs.pos.y;
-        let distFromBottom = HEIGHT - specs.pos.y;
-
-        if (notCloseEnough(distFromLeft) && notCloseEnough(distFromRight) && notCloseEnough(distFromTop) && notCloseEnough(distFromBottom)){
-            return WALLS.NO_CLOSE_WALL;
-        }
-
-        if(distFromRight < distFromLeft){
-            if(distFromTop < distFromBottom){
-                if (distFromRight < distFromTop){
-                    return WALLS.RIGHT;
-                }
-                else {
-                    return WALLS.TOP;
-                }
-            }
-            else {
-                if (distFromRight < distFromBottom){
-                    return WALLS.RIGHT;
-                }
-                else {
-                    return WALLS.BOTTOM;
-                }
-            }
-        }
-        else {            
-            if(distFromTop < distFromBottom){
-                if (distFromTop < distFromLeft){
-                    return WALLS.TOP;
-                }
-                else{
-                    return WALLS.LEFT
-                }
-            }
-            else {
-                if (distFromBottom < distFromLeft){
-                    return WALLS.BOTTOM;
-                }
-                else{
-                    return WALLS.LEFT;
-                }
-            }
-        }
-    }
-
     function anglesAreClose(angleOne, angleTwo, margin){
-        return Math.abs(angleOne - angleTwo) > margin || Math.abs((angleOne - 2 * Math.PI) - angleTwo) > margin;
+        return Math.abs(angleOne - angleTwo) < margin || Math.abs((angleOne - 2 * Math.PI) - angleTwo) < margin;
     }
 
 
     function turnAwayFromDir(dir){  
-        let turnLeftDir = specs.orientation;
-        let turnRightDir = specs.orientation; 
+        let dirMagnitude = 0;
+        let leftDir = dir;
+        let rightDir = dir;
         while (true){
-            turnLeftDir -= TEST_TURN_RATE;
-            turnRightDir += TEST_TURN_RATE;
-            turnLeftDir = bindRadian(turnLeftDir)
-            turnRightDir = bindRadian(turnLeftDir)
-            if (anglesAreClose(turnRightDir, dir, TEST_TURN_RATE)){
-                console.log("turnRightDir: " + turnRightDir)
-                console.log("turnLeftDir: " + turnLeftDir)
-                console.log()
+            dirMagnitude += TEST_TURN_RATE;
+            leftDir = specs.orientation - dirMagnitude;
+            rightDir = specs.orientation + dirMagnitude;
+            if (anglesAreClose(bindRadian(leftDir), dir, TEST_TURN_RATE)){
                 return Math.PI / 2;
             }
-            else if(anglesAreClose(turnLeftDir, dir, TEST_TURN_RATE)){
-                return -1 * Math.PI / 2;
+            else if(anglesAreClose(bindRadian(rightDir), dir, TEST_TURN_RATE)){
+                return -Math.PI / 2;
             }
         }
     }
 
     function avoidWalls(){
-        switch(findClosestWall()){
-            case WALLS.TOP:
-                console.log("TOP");
-                return turnAwayFromDir(3 * Math.PI / 2);
-            case WALLS.BOTTOM:
-                console.log("BOTTOM");
-                return turnAwayFromDir(Math.PI / 2);
-            case WALLS.LEFT:
-                console.log("LEFT");
-                return turnAwayFromDir(Math.PI);
-            case WALLS.RIGHT:
-                console.log("RIGHT");
-                return turnAwayFromDir(0);
-            case WALLS.NO_CLOSE_WALL:
-                return 0;
+        let distFromLeft = specs.pos.x;
+        let distFromRight = WIDTH - specs.pos.x;
+        let distFromTop = specs.pos.y;
+        let distFromBottom = HEIGHT - specs.pos.y;
+        if(closeEnough(distFromLeft)){
+            if(closeEnough(distFromTop)){
+                return turnAwayFromDir(FULL_RADIAN * 5 / 8)
+            }
+            else if (closeEnough(distFromBottom)){
+                return turnAwayFromDir(FULL_RADIAN * 3 / 8)            
+            }
+            else{
+                return turnAwayFromDir(FULL_RADIAN / 2)
+            }
+        }
+        else if(closeEnough(distFromRight)){
+            if(closeEnough(distFromTop)){
+                return turnAwayFromDir(FULL_RADIAN * 7 / 8)
+            }
+            else if (closeEnough(distFromBottom)){
+                return turnAwayFromDir(FULL_RADIAN / 8)            
+            }
+            else{
+                return turnAwayFromDir(0)
+            }
+        }
+        else if(closeEnough(distFromTop)){
+            return turnAwayFromDir(FULL_RADIAN * 3 / 4)
+        }
+        else if(closeEnough(distFromBottom)){
+            return turnAwayFromDir(FULL_RADIAN / 4)
+        }
+        else {
+            return 0;
         }
     }
     
     function setOrientation(timeInSeconds, boids){
         let turn = 0;
+
+        let turnFromWallsVal = avoidWalls();
     
-        turn += avoidWalls();
+        if (turnFromWallsVal !== 0){
+            turn = turnFromWallsVal;
+        }
+        else {
+        }
 
         turn = bindToLimit(turn, MAX_TURN_RATE * timeInSeconds);
         
